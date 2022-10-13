@@ -1,11 +1,11 @@
 --viewing the tables from database coviddata
 select * from 
 coviddata.dbo.coviddeaths
-order by 2,3
+order by 2,3;
 
 select * from 
 coviddata.dbo.Covidvaccinations
-order by 2,3
+order by 2,3;
 
 
 
@@ -81,7 +81,7 @@ on cd.location = cv.location
 and cd.date = cv.date
 where cd.continent is not null and cd.population is not null 
 )
-select* from popvsvac
+select* from popvsvac;
 
 --Using temp table
 drop table if exists #percentpopulationvaccinated
