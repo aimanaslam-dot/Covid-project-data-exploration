@@ -1,8 +1,6 @@
 
-  --Data exploration of covid19 data set
-  --concepts  used joins,Agrregate functions,windows function,CTE,Temptable.
-
-
+  Data exploration of covid19 dataset
+  concepts  used joins,Agrregate functions,windows function,CTE,Temptable.
 
 --viewing the tables from coviddata database
 select * from 
