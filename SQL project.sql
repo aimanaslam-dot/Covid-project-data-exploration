@@ -1,0 +1,110 @@
+--viewing the tables from database coviddata
+select * from 
+coviddata.dbo.coviddeaths
+order by 2,3
+
+select * from 
+coviddata.dbo.Covidvaccinations
+order by 2,3
+
+
+
+--looking at Total cases vs total deaths
+--shows the likelihood of dying of covid in my country
+
+select location,date,total_cases,total_deaths,round((total_deaths/total_cases)*100,2) as death_percentage
+from CovidData.dbo.CovidDeaths
+where location = 'india'
+order by 1,2;
+
+--Looking at total cases vs population
+--shows the percentage of population got covid in my country
+select location,date,total_cases,population,round((total_cases/population)*100,2) as population_infected
+from CovidData.dbo.CovidDeaths
+where location = 'india'
+order by 1,2;
+
+--looking at countries with highest infection rate
+select location, population,Max(total_cases) as highest_infection_count,round(Max((total_cases/population)*100),2) as highest_percentage_count
+from CovidData.dbo.CovidDeaths
+group by location,population
+order by highest_infection_count desc;
+
+--looking at countries with highest death count
+select location,  Max(cast(total_deaths as int)) as highest_death_count
+from CovidData.dbo.CovidDeaths
+where continent  is not null
+group by location
+order by  highest_death_count desc;
+
+--lets break down with continent
+
+select continent, max(cast(total_deaths as int)) as highest_death_count
+from CovidData.dbo.CovidDeaths
+where continent is not null
+group by continent
+order by highest_death_count desc;
+
+--showing continents with highest death count per population
+select continent,population, max(cast(total_deaths as int)) as highest_death_count
+from CovidData.dbo.CovidDeaths
+where continent is not  null
+group by continent,population
+order by highest_death_count desc;
+
+
+--Global Numbers
+
+select sum(new_cases) as total_cases_,sum(cast(new_deaths as int)) as total_deaths,(sum(cast(new_deaths as int))/sum(new_cases)*100) as global_death_percentage
+from coviddata.dbo.coviddeaths
+where continent is not null
+order by 1,2;
+
+--Global numbers as date wise
+
+select date, sum(new_cases) as total_cases_,sum(cast(new_deaths as int)) as total_deaths,(sum(cast(new_deaths as int))/sum(new_cases)*100) as global_death_percentage
+from coviddata.dbo.coviddeaths
+where continent is not null
+group by date
+order by 1,2;
+
+--Looking at populations vs vaccinations
+
+--using CTE
+ with popvsvac(continent,location,date,population,new_vaccinations,rolling_people_vaccination) as
+ (
+ select distinct  cd.continent, cd.location,cd.date,cd.population,cv.new_vaccinations,
+sum(convert(bigint, cv.new_vaccinations)) over (partition by cd.location order by cd.location,cd.date) as rolling_people_vaccination
+from coviddata.dbo.coviddeaths cd
+  join coviddata.dbo.Covidvaccinations cv
+on cd.location = cv.location 
+and cd.date = cv.date
+where cd.continent is not null and cd.population is not null 
+)
+select* from popvsvac
+
+--Using temp table
+drop table if exists #percentpopulationvaccinated
+
+create table #percentpopulationvaccinated
+(
+Continent nvarchar(255),
+location nvarchar (255),
+date datetime,
+population numeric,
+new_vaccinations numeric,
+rollingpeoplevaccination numeric)
+
+insert into #percentpopulationvaccinated
+ select cd.continent, cd.location,cd.date,cd.population,cv.new_vaccinations,
+sum(convert(bigint, cv.new_vaccinations)) over (partition by cd.location order by cd.location,cd.date) as rollingpeoplevaccination
+from coviddata.dbo.coviddeaths cd
+  join coviddata.dbo.Covidvaccinations cv
+on cd.location = cv.location 
+and cd.date = cv.date
+where cd.continent is not null and cd.population is not null 
+
+select *,round((rollingpeoplevaccination/population)*100,3) as percent_rollingpeoplevaccination
+from #percentpopulationvaccinated;
+
+
