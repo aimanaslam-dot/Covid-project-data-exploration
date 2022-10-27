@@ -1,8 +1,8 @@
 
-  Data exploration of covid19 dataset
-  concepts  used joins,Agrregate functions,windows function,CTE,Temptable.
+  Data exploration of covid19 dataset till 29 october 2022
+  The data set is available on https://ourworldindata.org/covid-deaths
+  Concepts  used joins,Agrregate functions,windows function,CTE,Temptable.
 
---viewing the tables from coviddata database
 select * from 
 coviddata.dbo.coviddeaths
 order by 2,3;
